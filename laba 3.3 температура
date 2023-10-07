@@ -1,0 +1,119 @@
+//  Website http://www.AeroArduino.com
+
+//  http://www.youtube.com/aeroarduino?sub_confirmation=1
+
+// https://youtu.be/yx_4Y3CQi3E
+
+
+#include <LiquidCrystal.h>
+
+#define RS 7
+#define E  6
+#define D4 5
+#define D5 4
+#define D6 3
+#define D7 2
+
+LiquidCrystal lcd(RS, E, D4, D5, D6, D7);
+
+byte degree[] = { 7, 5, 7, 0, 0, 0, 0, 0 };
+
+#define sensorTMP36   A0
+
+void setup() {
+  lcd.begin(16, 2);
+  lcd.createChar(0, degree);
+  lcd.clear();
+  lcd.print("Temperature");
+
+  delay(50);
+  delline(1);
+
+
+  Serial.begin(9600);
+}
+
+
+
+String msg;
+void Temperature ( int v ) {
+  msg = "";
+  if (v >= 56 && v <= 125)        {
+
+    msg =  " HOT    ";
+  }
+  else if (v >= 40  && v <= 55) {
+
+    msg =  " WARM   ";
+  }
+  else if (v >= 25  && v <= 39) {
+
+    msg = " NORMAL ";
+  }
+  else if (v >= 10  && v <= 24) {
+
+    msg = " COOL   ";
+  }
+  else if (v >= 0   && v <= 9)  {
+
+    msg = " COLD   ";
+  }
+  else if (v >= -40 && v <= -1) {
+
+    msg =  " FREEZE ";
+  }
+}
+
+float fmap(long x, long in_min, long in_max, long out_min, long out_max) {
+  return (float)(x - in_min) * (out_max - out_min) / (float)(in_max - in_min) + out_min;
+}
+
+void delline(int line) {
+  lcd.setCursor(0, line);
+  lcd.print("                     ");
+  lcd.setCursor(0, line);
+}
+
+int Select = 0; // default print Celsius temperature
+// 0 Celsius
+// 1 Fahrenheit
+
+
+void loop() {
+   float C = fmap(((analogRead(sensorTMP36) - 20 ) * 3.04), 0, 1023, -40, 125);
+ //  float C =  map(((analogRead(sensorTMP36) - 20 ) * 3.04), 0, 1023, -40, 125);
+
+/* Adafruit
+  float C = analogRead(sensorTMP36);
+  C = (float)C / 1024; 
+  C = C * 5;   
+  C = C - 0.5;  
+  C = C * 100;  
+*/
+  
+  Temperature(C);
+  
+  float Celsius    = C;
+  
+  // Temperature conversions from Celsius         Temperature conversions to Celsius
+  float Fahrenheit = C * 9 / 5 + 32;                 // C = (F - 32) * 5 / 9
+ 
+  
+  switch (Select) {
+    case 0:
+      lcd.setCursor(4, 1);  lcd.print("Celsius");
+      delay(2500); delline(1);
+      lcd.print(Celsius);
+      lcd.write((byte)0); lcd.print("C  ");
+      break;
+    case 1:
+      lcd.setCursor(3, 1); lcd.print("Fahrenheit");
+      delay(2500); delline(1);
+      lcd.print(Fahrenheit);
+      lcd.write((byte)0); lcd.print("F  ");
+      break;
+    
+  }
+  lcd.setCursor(9, 1); lcd.print(msg);
+  delay(1000); delline(1);
+}
