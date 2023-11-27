@@ -1,0 +1,35 @@
+import osimport sqlite3
+import serial
+# Create DB in current fileDEFAULT_PATH = os.path.join(os.path.dirname(__file__), 'StudentDB.db')
+CREATE_SQL_FILE = os.path.join(os.path.dirname(__file__), 'ValueDB.sql')
+def db_connect(db_path=DEFAULT_PATH):
+    con = sqlite3.connect(db_path)    return con
+
+def create_table():    db_conn = db_connect()
+    with db_conn:        try:
+            db_conn = db_connect()            cursor = db_conn.cursor()
+            print("Successfully Connected to SQLite")            with open(CREATE_SQL_FILE, 'r') as sqlite_file:
+                sql_script = sqlite_file.read()            cursor.executescript(sql_script)
+            print("SQLite script executed successfully")            cursor.close()
+        except sqlite3.Error as error:
+            print("Error while executing sqlite script", error)    print("Successfully created table!")
+
+def create_student_task(conn, table123):
+    sql = ''' INSERT INTO TABLE123(id, value) VALUES(?,?) '''    cur = conn.cursor()
+    cur.execute(sql, table123)    conn.commit()
+    return cur.lastrowid
+def create_values(id, pirVal):
+    # create a database connection    db_conn = db_connect()
+    with db_conn:
+        value1 = (id, pirVal)        # create student
+        create_student_task(db_conn, value1)
+def main():
+    create_table()    a = 1
+    ser = serial.Serial('COM7', 9600)  # Подключаемся к com порту на скорости 9600    pirPin = 8
+    while True:        pirVal = ser.readline().decode('utf-8').rstrip()  # Считываем значения с датчика движения
+        create_values(a, pirVal)        a += 1
+        if pirVal != "HIGH":            print("Сканирую")  # В противном случае выводим сообщение о сканировании
+        else:  # Если обнаружили движение, то выводим сообщение о тревоге            print("Тревога")
+        ser.flushInput()  # Очищаем буфер входного потока данных, чтобы избежать ошибок при чтении следующих данных
+if __name__ == '__main__':
+    main()
