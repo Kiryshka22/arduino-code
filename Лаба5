@@ -1,0 +1,165 @@
+#include <Adafruit_NeoPixel.h>
+#include <LiquidCrystal.h>
+
+LiquidCrystal meter(12,11,A2,A3,A4,A5);
+
+int TempCollect;
+float TempC;
+int R;
+int G;
+int B;
+int gas;
+int mode;
+
+Adafruit_NeoPixel led = Adafruit_NeoPixel(48, 3, NEO_GRB + NEO_KHZ800);
+
+byte Degree[8] = {
+  B00000,
+  B00001,
+  B00000,
+  B01110,
+  B10000,
+  B10000,
+  B01110,
+};
+
+void setup()
+{
+  meter.createChar(1,Degree);
+  pinMode(10,INPUT);
+  pinMode(5,OUTPUT);
+  meter.begin(16,2);
+  pinMode(9,OUTPUT);
+  led.begin();
+  pinMode(A0,INPUT);
+  pinMode(A1,INPUT);
+}
+
+void loop()
+{
+  analogWrite(5,20);
+  mode = digitalRead(10);
+  while(mode == 0){
+    mode = digitalRead(10);
+  gas = analogRead(A1);
+  TempCollect = analogRead(A0);
+  TempC = (((TempCollect*5.0)/1024)-0.5)*100;
+  if(TempC <= 10)
+  {
+    R = 0;
+    G = random(90);
+    B = random(120,220);
+    led.fill(led.Color(R,G,B));
+    led.show();
+    meter.setCursor(0,0);
+    meter.print("Temperature     ");
+    meter.setCursor(12,0);
+    meter.print(TempC);
+    meter.setCursor(15,0);
+    meter.write(byte(1));
+    meter.setCursor(0,1);
+    meter.print(" Freezing Cold  ");
+    Serial.print("Temperature: ");
+    Serial.print(TempC);
+  }
+   if(TempC <= 20 && TempC >=11)
+  {
+    R = 0;
+    G = random(120);
+    B = random(60);
+    led.fill(led.Color(R,G,B));
+    led.show();
+    meter.setCursor(0,0);
+    meter.print("Temperature     ");
+    meter.setCursor(12,0);
+    meter.print(TempC);
+    meter.setCursor(15,0);
+    meter.write(byte(1));
+    meter.setCursor(0,1);
+    meter.print(" Wear a jacket  ");
+    Serial.print("Temperature: ");
+    Serial.print(TempC);
+  }
+  if(TempC <= 55 && TempC >=21)
+  {
+    R = 0;
+    G = random(120,220);
+    B = random(20);
+    led.fill(led.Color(R,G,B));
+    led.show();
+    meter.setCursor(0,0);
+    meter.print("Temperature     ");
+    meter.setCursor(12,0);
+    meter.print(TempC);
+    meter.setCursor(15,0);
+    meter.write(byte(1));
+    meter.setCursor(0,1);
+    meter.print("Friendly Temp :)");
+    Serial.print("Temperature: ");
+    Serial.print(TempC);
+  }
+  if(TempC <= 70 && TempC >=56)
+  {
+    R = random(100,255);
+    G = random(120,220);
+    B = 0;
+    led.fill(led.Color(R,G,B));
+    led.show();
+    meter.setCursor(0,0);
+    meter.print("Temperature      ");
+    meter.setCursor(12,0);
+    meter.print(TempC);
+    meter.setCursor(15,0);
+    meter.write(byte(1));
+    meter.setCursor(0,1);
+    meter.print(" Isen't it hot? ");
+    Serial.print("Temperature: ");
+    Serial.print(TempC);
+  }
+  if(TempC <= 130 && TempC >=71 && gas <= 99)
+  {
+    R = random(180,220);;
+    G = random(80);
+    B = 0;
+    led.fill(led.Color(R,G,B));
+    led.show();
+    meter.setCursor(0,0);
+    meter.print("Temperature     ");
+    meter.setCursor(12,0);
+    meter.print(TempC);
+    meter.setCursor(15,0);
+    meter.write(byte(1));
+    meter.setCursor(0,1);
+    meter.print("Cooking or what?");
+    Serial.print("Temperature: ");
+    Serial.print(TempC);
+  }
+  if(TempC <= 20 && TempC >=21 && gas >= 0)
+  {
+    led.fill(led.Color(255,0,0));
+    led.show();
+    digitalWrite(9,1);
+    delay(200);
+    digitalWrite(9,0);
+    meter.setCursor(0,0);
+    meter.print("Temperature     ");
+    meter.setCursor(12,0);
+    meter.print(TempC);
+    meter.setCursor(15,0);
+    meter.write(byte(1));
+    meter.setCursor(0,1);
+    meter.print(" FIRE! Where?!  ");
+    Serial.print("Temperature: ");
+    Serial.print(TempC);
+    delay(200);
+  }
+  }
+  while (mode == 1)
+  {
+    meter.clear();
+    mode = digitalRead(10);
+    led.fill(led.Color(random(255),random(255),random(255)));
+    led.show();
+    delay(20);
+  }
+}
